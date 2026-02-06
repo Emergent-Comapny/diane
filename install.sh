@@ -105,15 +105,13 @@ get_installed_version() {
     
     # Send MCP initialize request and extract version from response
     # The server responds with serverInfo.version in the initialize response
+    # Version is returned with 'v' prefix (e.g., v1.0.1), possibly with git suffix
     INSTALLED=$(echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"installer","version":"1.0.0"}}}' | \
         timeout 2 "$BINARY_PATH" 2>/dev/null | \
-        grep -o '"version":"[^"]*"' | head -1 | sed 's/"version":"//;s/"//')
+        grep -o '"version":"[^"]*"' | head -1 | sed 's/"version":"//;s/"//;s/-.*//')
     
-    if [ -n "$INSTALLED" ]; then
-        echo "v${INSTALLED}"
-    else
-        echo ""
-    fi
+    # INSTALLED now contains version like "v1.0.1" (stripped git suffix like "-1-gabcdef")
+    echo "$INSTALLED"
 }
 
 # Check if upgrade is needed
